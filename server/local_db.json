@@ -1,0 +1,170 @@
+{
+  "profile": {
+    "socials": {
+      "github": "https://github.com",
+      "linkedin": "https://linkedin.com",
+      "email": "harsath137@gmail.com",
+      "phone": "+91 6382245266",
+      "location": "Pudukkottai, Tamil Nadu, India"
+    },
+    "name": "Harsath",
+    "role": "Software developer",
+    "tagline": "I build modern, responsive, and high-performance web applications with clean code and intuitive user experiences. Passionate about creating innovative software solutions that solve real-world problems.",
+    "photo": "/harsath_photo.png",
+    "resumeUrl": "/G.Harsath Resume.pdf"
+  },
+  "about": {
+    "education": [
+      {
+        "id": "edu-1",
+        "institution": "Nehru Institute of Information Technology and Management",
+        "degree": "Master of Computer Applications",
+        "_id": "6a662868bbd534f406cbf0da"
+      },
+      {
+        "id": "edu-2",
+        "institution": "JJ College of Arts and Science",
+        "degree": "Bachelor of Computer Applications",
+        "_id": "6a662868bbd534f406cbf0db"
+      }
+    ],
+    "experience": [
+      {
+        "id": "exp-1785082876058",
+        "role": "Full-Stack Developer",
+        "company": "AK Technologies",
+        "period": "Feb 2026 - May 2026",
+        "highlights": [],
+        "_id": "6a66340abbd534f406cbf274"
+      }
+    ]
+  },
+  "skills": {
+    "0": {
+      "category": "Frontend Development",
+      "items": [
+        "React.js",
+        "JavaScript (ES6+)",
+        "HTML5 & CSS3",
+        "Tailwind CSS",
+        "Redux Toolkit"
+      ],
+      "_id": "6a662868bbd534f406cbf0de"
+    },
+    "1": {
+      "category": "Backend & Databases",
+      "items": [
+        "Node.js",
+        "Express.js",
+        "MongoDB",
+        "MySQL",
+        "REST APIs"
+      ],
+      "_id": "6a662868bbd534f406cbf0df"
+    },
+    "2": {
+      "category": "Tools & Workflow",
+      "items": [
+        "Git & GitHub",
+        "Vite",
+        "VS Code",
+        "Postman",
+        "Figma"
+      ],
+      "_id": "6a662868bbd534f406cbf0e0"
+    },
+    "frontend": [
+      "HTML",
+      "CSS",
+      "Javascript",
+      "React",
+      "Bootstrap",
+      "Tailwind"
+    ],
+    "backend": [
+      "NodeJs",
+      "ExpressJS",
+      "RestAPI"
+    ],
+    "database": [
+      "MongoDB",
+      "MySQL",
+      "Firebase"
+    ],
+    "tools": [
+      "GitHub",
+      "Git",
+      "Vercel",
+      "Render",
+      "Postman"
+    ]
+  },
+  "_id": "6a662868bbd534f406cbf0d9",
+  "projects": [
+    {
+      "id": "proj-1",
+      "title": "TaskFlow Pro",
+      "description": "Kanban-style project management dashboard with real-time drag-and-drop features and team activity feeds.",
+      "tags": [
+        "React",
+        "Node.js",
+        "MongoDB",
+        "Tailwind"
+      ],
+      "image": "https://images.unsplash.com/photo-1507238691740-187a5b1d37b8?auto=format&fit=crop&q=80&w=600",
+      "githubLink": "https://github.com",
+      "liveLink": "https://example.com",
+      "_id": "6a662868bbd534f406cbf0e1"
+    },
+    {
+      "id": "proj-2",
+      "title": "EduPulse LMS",
+      "description": "Comprehensive Learning Management System with video streaming, quiz engine, and progress analytics.",
+      "tags": [
+        "React",
+        "Express",
+        "MySQL",
+        "Chart.js"
+      ],
+      "image": "https://images.unsplash.com/photo-1516321318423-f06f85e504b3?auto=format&fit=crop&q=80&w=600",
+      "githubLink": "https://github.com",
+      "liveLink": "https://example.com",
+      "_id": "6a662868bbd534f406cbf0e2"
+    },
+    {
+      "id": "proj-3",
+      "title": "DevMetrics API",
+      "description": "Developer productivity tracking API service with automated github commit parsing and metrics dashboard.",
+      "tags": [
+        "Node.js",
+        "PostgreSQL",
+        "Docker",
+        "Redis"
+      ],
+      "image": "https://images.unsplash.com/photo-1555066931-4365d14bab8c?auto=format&fit=crop&q=80&w=600",
+      "githubLink": "https://github.com",
+      "liveLink": "https://example.com",
+      "_id": "6a662868bbd534f406cbf0e3"
+    }
+  ],
+  "awards": [
+    {
+      "id": "award-2",
+      "title": "Web Design",
+      "issuer": "Hindustan College of Arts and Science",
+      "year": "2026",
+      "description": "Awarded 2nd Place in the Web Design Competition demonstrating creativity and proficiency in web design and user interface development.",
+      "credentialUrl": "https://example.com",
+      "badges": [
+        "Frontend",
+        "UI Design",
+        "Innovation"
+      ],
+      "_id": "6a662868bbd534f406cbf0e5",
+      "date": "2026"
+    }
+  ],
+  "createdAt": "2026-07-26T15:31:52.721Z",
+  "updatedAt": "2026-07-26T16:22:47.183Z",
+  "__v": 0
+}
