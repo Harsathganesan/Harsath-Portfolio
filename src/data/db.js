@@ -151,23 +151,29 @@ export const checkBackendConnection = async () => {
   };
 };
 
-export const fetchPortfolioFromDB = async () => {
-  const controller = new AbortController();
-  const timeoutId = setTimeout(() => controller.abort(), 2000);
+export const fetchPortfolioFromDB = async (retries = 2) => {
+  for (let attempt = 1; attempt <= retries; attempt++) {
+    const controller = new AbortController();
+    const timeoutId = setTimeout(() => controller.abort(), 4000);
 
-  try {
-    const res = await fetch(API_URL, { signal: controller.signal });
-    clearTimeout(timeoutId);
-    if (res.ok) {
-      const data = await res.json();
-      if (data && data.profile) {
-        localStorage.setItem(STORAGE_KEY, JSON.stringify(data));
-        return data;
+    try {
+      const res = await fetch(API_URL, { signal: controller.signal });
+      clearTimeout(timeoutId);
+      if (res.ok) {
+        const data = await res.json();
+        if (data && data.profile) {
+          localStorage.setItem(STORAGE_KEY, JSON.stringify(data));
+          return data;
+        }
+      }
+    } catch (error) {
+      clearTimeout(timeoutId);
+      if (attempt < retries) {
+        await new Promise(r => setTimeout(r, 1000));
+      } else {
+        console.warn('MongoDB API server fetch offline/unreachable, using local database cache.');
       }
     }
-  } catch (error) {
-    clearTimeout(timeoutId);
-    console.warn('MongoDB API server fetch timeout or offline, using local database cache.');
   }
   return getPortfolioData();
 };

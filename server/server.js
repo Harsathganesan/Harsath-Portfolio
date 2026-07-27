@@ -133,19 +133,40 @@ const SEED_DATA = {
 const MONGODB_URI = process.env.MONGODB_URI;
 
 if (MONGODB_URI && !MONGODB_URI.includes('<username>')) {
-  mongoose.connect(MONGODB_URI)
-    .then(async () => {
-      console.log('Successfully connected to MongoDB Atlas!');
-      const count = await Portfolio.countDocuments();
-      if (count === 0) {
-        console.log('Seeding initial portfolio data into MongoDB Atlas...');
-        await Portfolio.create(SEED_DATA);
-        console.log('MongoDB Atlas seeded successfully!');
-      }
+  const connectWithRetry = () => {
+    console.log('Connecting to MongoDB Atlas...');
+    mongoose.connect(MONGODB_URI, {
+      serverSelectionTimeoutMS: 5000,
+      socketTimeoutMS: 45000,
     })
-    .catch((err) => console.error('MongoDB Atlas Connection Error:', err));
+      .then(async () => {
+        console.log('Successfully connected to MongoDB Atlas!');
+        const count = await Portfolio.countDocuments();
+        if (count === 0) {
+          console.log('Seeding initial portfolio data into MongoDB Atlas...');
+          await Portfolio.create(SEED_DATA);
+          console.log('MongoDB Atlas seeded successfully!');
+        }
+      })
+      .catch((err) => {
+        console.error('MongoDB Atlas Connection Error:', err.message);
+        console.log('Retrying MongoDB connection in 5 seconds...');
+        setTimeout(connectWithRetry, 5000);
+      });
+  };
+
+  connectWithRetry();
+
+  mongoose.connection.on('disconnected', () => {
+    console.warn('MongoDB Atlas disconnected! Attempting reconnect...');
+    connectWithRetry();
+  });
+
+  mongoose.connection.on('error', (err) => {
+    console.error('MongoDB connection error:', err.message);
+  });
 } else {
-  console.log('MongoDB URI placeholder detected in .env file. Please update MONGODB_URI in .env with your MongoDB Atlas connection string.');
+  console.log('MongoDB URI placeholder detected in .env file. Please update MONGODB_URI in .env with your connection string.');
 }
 
 app.listen(PORT, () => {

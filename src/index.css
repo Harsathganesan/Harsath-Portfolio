@@ -36,8 +36,9 @@
   --btn-social-bg: rgba(15, 23, 42, 0.03);
   --timeline-period-bg: rgba(15, 23, 42, 0.04);
   --skill-badge-bg: rgba(15, 23, 42, 0.02);
-  --input-bg: rgba(15, 23, 42, 0.01);
+  --input-bg: #ffffff;
   --input-focus-bg: #ffffff;
+  --bg-card: #ffffff;
   --modal-backdrop-bg: rgba(15, 23, 42, 0.4);
   --admin-row-bg: rgba(15, 23, 42, 0.01);
   --admin-sidebar-active: rgba(109, 40, 217, 0.06);
@@ -231,14 +232,15 @@ button, input, textarea, select {
 }
 
 .btn-secondary {
-  background: var(--btn-secondary-bg);
-  border-color: var(--border-glass);
-  color: var(--text-primary);
+  background: #f1f5f9;
+  border-color: #cbd5e1;
+  color: #334155;
 }
 
 .btn-secondary:hover {
-  background: rgba(15, 23, 42, 0.05);
-  border-color: rgba(15, 23, 42, 0.15);
+  background: #e2e8f0;
+  border-color: #94a3b8;
+  color: #0f172a;
   transform: translateY(-2px);
 }
 
@@ -1585,25 +1587,29 @@ button, input, textarea, select {
 
 .form-label {
   font-size: 0.85rem;
-  font-weight: 500;
-  color: var(--text-secondary);
+  font-weight: 600;
+  color: #334155;
 }
 
 .form-input, .form-textarea {
-  background: var(--input-bg);
-  border: 1px solid var(--border-glass);
+  background: #ffffff;
+  border: 1px solid #cbd5e1;
   border-radius: 8px;
   padding: 0.8rem 1rem;
   font-size: 0.95rem;
-  color: var(--text-primary);
+  color: #0f172a;
   outline: none;
   transition: var(--transition-fast);
 }
 
+.form-input::placeholder, .form-textarea::placeholder {
+  color: #94a3b8;
+}
+
 .form-input:focus, .form-textarea:focus {
   border-color: var(--accent-primary);
-  background: var(--input-focus-bg);
-  box-shadow: 0 0 10px rgba(139, 92, 246, 0.15);
+  background: #ffffff;
+  box-shadow: 0 0 0 3px rgba(109, 40, 217, 0.12);
 }
 
 .form-textarea {
@@ -1899,9 +1905,9 @@ button, input, textarea, select {
   left: 0;
   width: 100vw;
   height: 100vh;
-  background: rgba(15, 23, 42, 0.55);
-  backdrop-filter: blur(12px);
-  -webkit-backdrop-filter: blur(12px);
+  background: rgba(15, 23, 42, 0.45);
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
   display: flex;
   justify-content: center;
   align-items: center;
@@ -1916,9 +1922,10 @@ button, input, textarea, select {
   overflow-y: auto;
   padding: 2rem;
   border-radius: 20px;
-  background: var(--bg-card);
-  border: 1px solid var(--border-glass-active);
-  box-shadow: 0 25px 60px rgba(0, 0, 0, 0.2);
+  background: #ffffff;
+  color: #0f172a;
+  border: 1px solid rgba(15, 23, 42, 0.12);
+  box-shadow: 0 25px 60px rgba(15, 23, 42, 0.18), 0 0 1px rgba(15, 23, 42, 0.1);
   animation: modalSlideIn 0.3s cubic-bezier(0.16, 1, 0.3, 1);
 }
 

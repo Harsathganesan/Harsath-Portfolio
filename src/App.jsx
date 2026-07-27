@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { BrowserRouter as Router, Routes, Route, useLocation } from 'react-router-dom';
+import { BrowserRouter as Router, Routes, Route, Link, Navigate, useLocation } from 'react-router-dom';
 import Navbar from './components/Navbar';
 import HomeSection from './components/HomeSection';
 import AboutSection from './components/AboutSection';
@@ -48,9 +48,26 @@ const PortfolioLanding = ({ data, theme, onToggleTheme }) => {
         fontSize: '0.9rem',
         background: 'var(--bg-secondary)',
         position: 'relative',
-        zIndex: 10
+        zIndex: 10,
+        display: 'flex',
+        flexDirection: 'column',
+        alignItems: 'center',
+        gap: '0.5rem'
       }}>
         <p>&copy; {new Date().getFullYear()} {data.profile.name}. All Rights Reserved.</p>
+        <Link 
+          to="/admin" 
+          style={{ 
+            color: 'var(--accent-primary)', 
+            fontSize: '0.82rem', 
+            fontWeight: '500', 
+            opacity: 0.8,
+            transition: 'opacity 0.2s',
+            marginTop: '0.25rem'
+          }}
+        >
+          ⚙️ Admin Console
+        </Link>
       </footer>
     </>
   );
@@ -113,6 +130,20 @@ function App() {
           } 
         />
         <Route 
+          path="/admin/*" 
+          element={
+            <>
+              <Navbar 
+                isAdmin={true} 
+                theme={theme} 
+                onToggleTheme={toggleTheme} 
+                onSignOut={() => window.location.href = '/'} 
+              />
+              <AdminPanel data={data} onUpdate={handleUpdate} />
+            </>
+          } 
+        />
+        <Route 
           path="/admin" 
           element={
             <>
@@ -126,6 +157,7 @@ function App() {
             </>
           } 
         />
+        <Route path="*" element={<Navigate to="/" replace />} />
       </Routes>
     </Router>
   );

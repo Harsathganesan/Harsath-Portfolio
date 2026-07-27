@@ -118,6 +118,19 @@ const Navbar = ({ isAdmin, theme, onToggleTheme, onSignOut }) => {
             </nav>
 
             <div className="navbar-actions-right">
+              <button 
+                className="btn btn-secondary"
+                onClick={() => navigate('/admin')} 
+                style={{ 
+                  padding: '0.45rem 0.9rem', 
+                  fontSize: '0.85rem', 
+                  gap: '0.45rem',
+                  borderRadius: '10px'
+                }}
+                title="Admin Console"
+              >
+                <LayoutDashboard size={15} /> <span className="nav-btn-text">Admin</span>
+              </button>
               <button className="nav-toggle" onClick={() => setMobileOpen(!mobileOpen)}>
                 {mobileOpen ? <X size={24} /> : <Menu size={24} />}
               </button>
