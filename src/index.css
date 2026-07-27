@@ -2015,13 +2015,19 @@ button, input, textarea, select {
 /* --- Mobile Responsiveness Breakpoints --- */
 @media (max-width: 992px) {
   .hero-wrapper {
-    grid-template-columns: 1fr;
+    display: flex;
+    flex-direction: column;
     text-align: center;
     gap: 2rem;
     padding-top: 1rem;
   }
   
+  .hero-image-container {
+    order: 1;
+  }
+
   .hero-info {
+    order: 2;
     align-items: center;
   }
   
@@ -2133,6 +2139,7 @@ button, input, textarea, select {
   }
 
   .hero-image-container {
+    order: 1;
     padding: 0.5rem 0;
     margin-bottom: 0.5rem;
     display: flex;
@@ -2155,6 +2162,7 @@ button, input, textarea, select {
   }
 
   .hero-info {
+    order: 2;
     align-items: center;
     text-align: center;
     gap: 0.75rem;
