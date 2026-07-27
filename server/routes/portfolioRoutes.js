@@ -205,14 +205,20 @@ router.put('/', async (req, res) => {
       if (!portfolio) {
         portfolio = new Portfolio(updatedData);
       } else {
-        portfolio.profile = updatedData.profile || portfolio.profile;
-        portfolio.about = updatedData.about || portfolio.about;
-        portfolio.skills = updatedData.skills || portfolio.skills;
-        portfolio.projects = updatedData.projects || portfolio.projects;
-        portfolio.awards = updatedData.awards || portfolio.awards;
+        if (updatedData.profile) portfolio.profile = updatedData.profile;
+        if (updatedData.about) portfolio.about = updatedData.about;
+        if (updatedData.skills) portfolio.skills = updatedData.skills;
+        if (updatedData.projects) portfolio.projects = updatedData.projects;
+        if (updatedData.awards) portfolio.awards = updatedData.awards;
+
+        portfolio.markModified('profile');
+        portfolio.markModified('about');
+        portfolio.markModified('skills');
+        portfolio.markModified('projects');
+        portfolio.markModified('awards');
       }
-      await portfolio.save();
-      return res.json(portfolio);
+      const savedDoc = await portfolio.save();
+      return res.json(savedDoc);
     }
   } catch (error) {
     console.warn('Could not sync to MongoDB Atlas, saved to local server file:', error.message);

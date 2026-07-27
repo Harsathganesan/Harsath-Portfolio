@@ -5,7 +5,7 @@ import {
   Edit3, RotateCcw, AlertCircle, PlusCircle, CheckCircle, ExternalLink, Upload, Trophy,
   Activity, Wifi, RefreshCw, Database, LayoutDashboard, BarChart3, TrendingUp, Zap
 } from 'lucide-react';
-import { savePortfolioData, resetPortfolioData, checkBackendConnection } from '../data/db';
+import { savePortfolioData, savePortfolioToDB, resetPortfolioData, checkBackendConnection } from '../data/db';
 
 const AdminPanel = ({ data, onUpdate }) => {
   const navigate = useNavigate();
@@ -137,35 +137,37 @@ const AdminPanel = ({ data, onUpdate }) => {
     setShowEduModal(true);
   };
 
-  const handleSaveEdu = (e) => {
+  const handleSaveEdu = async (e) => {
     e.preventDefault();
-    let updatedEdu = [...data.about.education];
+    const currentEdu = data.about?.education || [];
+    let updatedEdu;
     if (eduEditItem) {
-      updatedEdu = updatedEdu.map(item => item.id === eduEditItem.id ? { ...eduForm } : item);
+      updatedEdu = currentEdu.map(item => item.id === eduEditItem.id ? { ...eduForm } : item);
     } else {
       const newItem = { ...eduForm, id: `edu-${Date.now()}` };
-      updatedEdu.push(newItem);
+      updatedEdu = [...currentEdu, newItem];
     }
 
     const updated = {
       ...data,
-      about: { ...data.about, education: updatedEdu }
+      about: { ...(data.about || {}), education: updatedEdu }
     };
-    savePortfolioData(updated);
     onUpdate(updated);
+    await savePortfolioToDB(updated);
     setShowEduModal(false);
     triggerSuccessAlert(eduEditItem ? 'Education item updated!' : 'Education item added!');
   };
 
-  const handleDeleteEdu = (id) => {
+  const handleDeleteEdu = async (id) => {
     if (window.confirm('Are you sure you want to delete this education record?')) {
-      const updatedEdu = data.about.education.filter(item => item.id !== id);
+      const currentEdu = data.about?.education || [];
+      const updatedEdu = currentEdu.filter(item => item.id !== id);
       const updated = {
         ...data,
-        about: { ...data.about, education: updatedEdu }
+        about: { ...(data.about || {}), education: updatedEdu }
       };
-      savePortfolioData(updated);
       onUpdate(updated);
+      await savePortfolioToDB(updated);
       triggerSuccessAlert('Education item deleted.');
     }
   };
@@ -182,35 +184,37 @@ const AdminPanel = ({ data, onUpdate }) => {
     setShowExpModal(true);
   };
 
-  const handleSaveExp = (e) => {
+  const handleSaveExp = async (e) => {
     e.preventDefault();
-    let updatedExp = [...data.about.experience];
+    const currentExp = data.about?.experience || [];
+    let updatedExp;
     if (expEditItem) {
-      updatedExp = updatedExp.map(item => item.id === expEditItem.id ? { ...expForm } : item);
+      updatedExp = currentExp.map(item => item.id === expEditItem.id ? { ...expForm } : item);
     } else {
       const newItem = { ...expForm, id: `exp-${Date.now()}` };
-      updatedExp.push(newItem);
+      updatedExp = [...currentExp, newItem];
     }
 
     const updated = {
       ...data,
-      about: { ...data.about, experience: updatedExp }
+      about: { ...(data.about || {}), experience: updatedExp }
     };
-    savePortfolioData(updated);
     onUpdate(updated);
+    await savePortfolioToDB(updated);
     setShowExpModal(false);
     triggerSuccessAlert(expEditItem ? 'Experience item updated!' : 'Experience item added!');
   };
 
-  const handleDeleteExp = (id) => {
+  const handleDeleteExp = async (id) => {
     if (window.confirm('Are you sure you want to delete this experience record?')) {
-      const updatedExp = data.about.experience.filter(item => item.id !== id);
+      const currentExp = data.about?.experience || [];
+      const updatedExp = currentExp.filter(item => item.id !== id);
       const updated = {
         ...data,
-        about: { ...data.about, experience: updatedExp }
+        about: { ...(data.about || {}), experience: updatedExp }
       };
-      savePortfolioData(updated);
       onUpdate(updated);
+      await savePortfolioToDB(updated);
       triggerSuccessAlert('Experience item deleted.');
     }
   };

@@ -16,11 +16,14 @@ const PortfolioSchema = new mongoose.Schema({
     }
   },
   about: {
+    bio: { type: String, default: '' },
     education: [{
       id: String,
       institution: String,
       degree: String,
+      period: String,
       year: String,
+      grade: String,
       score: String
     }],
     experience: [{
@@ -28,6 +31,7 @@ const PortfolioSchema = new mongoose.Schema({
       role: String,
       company: String,
       period: String,
+      description: String,
       highlights: [String]
     }]
   },
@@ -50,11 +54,12 @@ const PortfolioSchema = new mongoose.Schema({
     id: String,
     title: String,
     issuer: String,
+    date: String,
     year: String,
     description: String,
     credentialUrl: String,
     badges: [String]
   }]
-}, { timestamps: true });
+}, { timestamps: true, strict: false });
 
 export default mongoose.model('Portfolio', PortfolioSchema);
