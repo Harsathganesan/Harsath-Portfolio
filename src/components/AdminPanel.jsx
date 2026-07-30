@@ -3,7 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import { 
   User, GraduationCap, Briefcase, Code, FolderGit, Lock, Save, Plus, Trash2, 
   Edit3, RotateCcw, AlertCircle, PlusCircle, CheckCircle, ExternalLink, Upload, Trophy,
-  Activity, Wifi, RefreshCw, Database, LayoutDashboard, BarChart3, TrendingUp, Zap, Inbox, Mail, MessageSquare
+  Activity, Wifi, RefreshCw, Database, LayoutDashboard, BarChart3, TrendingUp, Zap, Inbox, Mail, MessageSquare, Key
 } from 'lucide-react';
 import { savePortfolioData, savePortfolioToDB, resetPortfolioData, checkBackendConnection, fetchContactMessages, deleteContactMessage } from '../data/db';
 
@@ -14,6 +14,15 @@ const AdminPanel = ({ data, onUpdate }) => {
   const [loginError, setLoginError] = useState('');
   const [activeTab, setActiveTab] = useState('overview');
   const [savedSuccess, setSavedSuccess] = useState('');
+
+  // Passcode update state
+  const [passwordForm, setPasswordForm] = useState({
+    currentPassword: '',
+    newPassword: '',
+    confirmPassword: ''
+  });
+  const [passwordError, setPasswordError] = useState('');
+  const [passwordSuccess, setPasswordSuccess] = useState('');
 
   // Database Connection Health state
   const [dbHealth, setDbHealth] = useState(null);
@@ -80,12 +89,39 @@ const AdminPanel = ({ data, onUpdate }) => {
   // Handle Login authentication
   const handleLogin = (e) => {
     e.preventDefault();
-    if (passcode === 'admin123') {
+    const storedPasscode = localStorage.getItem('admin_passcode') || 'admin123';
+    if (passcode === storedPasscode) {
       setIsAuthenticated(true);
       setLoginError('');
     } else {
-      setLoginError('Invalid passcode! Try "admin123".');
+      setLoginError('Invalid passcode! Please try again.');
     }
+  };
+
+  // Handle Changing Admin Passcode
+  const handleChangePassword = (e) => {
+    e.preventDefault();
+    setPasswordError('');
+    setPasswordSuccess('');
+
+    const storedPasscode = localStorage.getItem('admin_passcode') || 'admin123';
+    if (passwordForm.currentPassword !== storedPasscode) {
+      setPasswordError('Current passcode is incorrect.');
+      return;
+    }
+    if (passwordForm.newPassword.length < 4) {
+      setPasswordError('New passcode must be at least 4 characters long.');
+      return;
+    }
+    if (passwordForm.newPassword !== passwordForm.confirmPassword) {
+      setPasswordError('New passcode and confirmation do not match.');
+      return;
+    }
+
+    localStorage.setItem('admin_passcode', passwordForm.newPassword);
+    setPasswordForm({ currentPassword: '', newPassword: '', confirmPassword: '' });
+    setPasswordSuccess('Passcode updated successfully!');
+    triggerSuccessAlert('Admin passcode changed successfully!');
   };
 
   const triggerSuccessAlert = (msg) => {
@@ -427,10 +463,6 @@ const AdminPanel = ({ data, onUpdate }) => {
               Unlock Console
             </button>
           </form>
-
-          <div style={{ background: 'rgba(255, 255, 255, 0.03)', padding: '0.8rem', borderRadius: '6px', fontSize: '0.85rem', border: '1px dashed var(--border-glass)' }}>
-            <span style={{ color: 'var(--accent-primary)', fontWeight: 600 }}>Default Passcode:</span> <code>admin123</code>
-          </div>
         </div>
       </div>
     );
@@ -479,6 +511,9 @@ const AdminPanel = ({ data, onUpdate }) => {
           <button className={`admin-sidebar-btn ${activeTab === 'messages' ? 'active' : ''}`} onClick={() => { setActiveTab('messages'); loadMessages(); }}>
             <Inbox size={18} /> Messages Inbox {messages.length > 0 && <span style={{ background: 'var(--accent-primary)', color: 'white', fontSize: '0.7rem', padding: '0.1rem 0.45rem', borderRadius: '10px', marginLeft: 'auto' }}>{messages.length}</span>}
           </button>
+          <button className={`admin-sidebar-btn ${activeTab === 'security' ? 'active' : ''}`} onClick={() => setActiveTab('security')}>
+            <Key size={18} /> Change Password
+          </button>
         </div>
 
         {/* Sidebar Footer Controls */}
@@ -518,6 +553,7 @@ const AdminPanel = ({ data, onUpdate }) => {
               {activeTab === 'projects' && 'Projects Portfolio'}
               {activeTab === 'awards' && 'Honors & Achievements'}
               {activeTab === 'messages' && 'Contact Form Messages Inbox'}
+              {activeTab === 'security' && 'Security & Passcode Settings'}
             </h2>
 
             {dbHealth && (
@@ -1000,6 +1036,74 @@ const AdminPanel = ({ data, onUpdate }) => {
                   </div>
                 )}
               </div>
+            </div>
+          )}
+
+          {/* SECURITY TAB */}
+          {activeTab === 'security' && (
+            <div style={{ maxWidth: '550px' }}>
+              <div className="admin-section-header" style={{ marginBottom: '1.5rem' }}>
+                <div>
+                  <h3>Change Admin Passcode</h3>
+                  <p style={{ color: 'var(--text-secondary)', fontSize: '0.88rem', margin: '0.25rem 0 0 0' }}>
+                    Update the passcode required to access your Admin Executive Console.
+                  </p>
+                </div>
+              </div>
+
+              <form onSubmit={handleChangePassword} className="glass-card" style={{ padding: '1.75rem', borderRadius: '16px', display: 'flex', flexDirection: 'column', gap: '1.25rem' }}>
+                <div className="form-group">
+                  <label className="form-label">Current Passcode</label>
+                  <input 
+                    type="password" 
+                    value={passwordForm.currentPassword} 
+                    onChange={(e) => setPasswordForm(prev => ({ ...prev, currentPassword: e.target.value }))} 
+                    className="form-input" 
+                    placeholder="Enter current passcode"
+                    required 
+                  />
+                </div>
+
+                <div className="form-group">
+                  <label className="form-label">New Passcode</label>
+                  <input 
+                    type="password" 
+                    value={passwordForm.newPassword} 
+                    onChange={(e) => setPasswordForm(prev => ({ ...prev, newPassword: e.target.value }))} 
+                    className="form-input" 
+                    placeholder="Enter new passcode"
+                    required 
+                  />
+                </div>
+
+                <div className="form-group">
+                  <label className="form-label">Confirm New Passcode</label>
+                  <input 
+                    type="password" 
+                    value={passwordForm.confirmPassword} 
+                    onChange={(e) => setPasswordForm(prev => ({ ...prev, confirmPassword: e.target.value }))} 
+                    className="form-input" 
+                    placeholder="Re-enter new passcode"
+                    required 
+                  />
+                </div>
+
+                {passwordError && (
+                  <div style={{ color: '#ef4444', fontSize: '0.88rem', display: 'flex', alignItems: 'center', gap: '0.4rem', background: 'rgba(239, 68, 68, 0.1)', padding: '0.66rem 0.9rem', borderRadius: '8px', border: '1px solid rgba(239, 68, 68, 0.2)' }}>
+                    <AlertCircle size={16} /> {passwordError}
+                  </div>
+                )}
+
+                {passwordSuccess && (
+                  <div style={{ color: '#10b981', fontSize: '0.88rem', display: 'flex', alignItems: 'center', gap: '0.4rem', background: 'rgba(16, 185, 129, 0.1)', padding: '0.66rem 0.9rem', borderRadius: '8px', border: '1px solid rgba(16, 185, 129, 0.2)' }}>
+                    <CheckCircle size={16} /> {passwordSuccess}
+                  </div>
+                )}
+
+                <button type="submit" className="btn btn-primary" style={{ justifyContent: 'center', marginTop: '0.5rem', padding: '0.75rem' }}>
+                  <Key size={16} /> Update Passcode
+                </button>
+              </form>
             </div>
           )}
         </div>
