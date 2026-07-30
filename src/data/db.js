@@ -198,12 +198,57 @@ export const savePortfolioToDB = async (data) => {
   return data;
 };
 
-export const savePortfolioData = (data) => {
-  savePortfolioToDB(data);
+export const savePortfolioData = async (data) => {
+  return await savePortfolioToDB(data);
 };
 
-export const resetPortfolioData = () => {
+export const resetPortfolioData = async () => {
   localStorage.setItem(STORAGE_KEY, JSON.stringify(SEED_DATA));
-  savePortfolioToDB(SEED_DATA);
+  await savePortfolioToDB(SEED_DATA);
   return SEED_DATA;
 };
+
+export const sendContactMessage = async (messageData) => {
+  try {
+    const res = await fetch(`${API_URL}/contact`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify(messageData)
+    });
+    if (res.ok) {
+      return await res.json();
+    }
+  } catch (error) {
+    console.warn('Could not send contact message to API, operating in local offline mode:', error.message);
+  }
+  return { success: true, message: 'Message recorded offline.' };
+};
+
+export const fetchContactMessages = async () => {
+  try {
+    const res = await fetch(`${API_URL}/messages`);
+    if (res.ok) {
+      return await res.json();
+    }
+  } catch (error) {
+    console.warn('Could not fetch contact messages from API server:', error.message);
+  }
+  return [];
+};
+
+export const deleteContactMessage = async (id) => {
+  try {
+    const res = await fetch(`${API_URL}/messages/${id}`, {
+      method: 'DELETE'
+    });
+    if (res.ok) {
+      return await res.json();
+    }
+  } catch (error) {
+    console.warn('Could not delete message from API server:', error.message);
+  }
+  return { success: false };
+};
+

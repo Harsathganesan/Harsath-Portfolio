@@ -308,6 +308,35 @@ button, input, textarea, select {
   background: linear-gradient(135deg, var(--text-primary) 40%, var(--accent-primary) 100%);
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
+  display: flex;
+  align-items: center;
+}
+
+.logo-full-text {
+  display: inline-block;
+}
+
+.logo-circle-avatar {
+  display: none;
+  width: 42px;
+  height: 42px;
+  border-radius: 50%;
+  background: linear-gradient(135deg, var(--accent-secondary), var(--accent-primary));
+  color: #ffffff;
+  -webkit-text-fill-color: #ffffff;
+  font-family: var(--font-title);
+  font-size: 1.25rem;
+  font-weight: 800;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0 4px 14px rgba(109, 40, 217, 0.35);
+  border: 2px solid rgba(255, 255, 255, 0.4);
+  transition: transform var(--transition-fast), box-shadow var(--transition-fast);
+}
+
+.logo-circle-avatar:hover {
+  transform: scale(1.06);
+  box-shadow: 0 6px 18px rgba(109, 40, 217, 0.5);
 }
 
 .nav-menu {
@@ -1270,6 +1299,10 @@ button, input, textarea, select {
   padding: 0.75rem 1.6rem !important;
 }
 
+.mobile-only-back-home {
+  display: none;
+}
+
 .project-img {
   width: 100%;
   height: 100%;
@@ -2112,6 +2145,16 @@ button, input, textarea, select {
     padding: 2.5rem 0 2rem 0;
   }
 
+  /* Spacing below Experience box before My Skills in mobile view */
+  .section#about {
+    padding-bottom: 2rem;
+    margin-bottom: 0.5rem;
+  }
+
+  .section#skills {
+    padding-top: 1.5rem;
+  }
+
   .section#home {
     height: auto;
     min-height: calc(100vh - 70px);
@@ -2329,19 +2372,93 @@ button, input, textarea, select {
     justify-content: center;
   }
   
+  /* Spacing below Projects section before Awards in mobile view */
+  .section#projects {
+    padding-bottom: 2.5rem;
+    margin-bottom: 0.5rem;
+  }
+
+  /* Spacing below Awards section before Contact in mobile view */
+  .section#awards {
+    padding-bottom: 2rem;
+    margin-bottom: 0.5rem;
+  }
+
+  .section#contact {
+    padding-top: 1.5rem;
+  }
+
+  .navbar-header {
+    height: 54px;
+  }
+  
   .navbar-container {
     display: flex;
     justify-content: space-between;
     align-items: center;
-    padding: 0 1.2rem;
+    padding: 0 0.8rem 0 0.5rem !important;
+    height: 54px;
+    width: 100%;
+  }
+
+  .navbar-nav-center {
+    display: contents;
+  }
+
+  .logo-text {
+    order: 1;
+    display: flex;
+    align-items: center;
+    gap: 0.45rem;
+    margin: 0 !important;
+    padding: 0 !important;
+  }
+
+  .logo-circle-avatar {
+    display: flex !important;
+    width: 34px;
+    height: 34px;
+    font-size: 1rem;
+  }
+
+  .logo-full-text {
+    display: inline-block !important;
+    font-size: 1.05rem !important;
+    font-weight: 800;
+    letter-spacing: -0.02em;
+    background: linear-gradient(135deg, var(--text-primary) 40%, var(--accent-primary) 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+  }
+
+  .navbar-actions-right {
+    order: 2;
+    display: flex;
+    align-items: center;
+    justify-content: flex-end;
+    margin: 0;
+    padding: 0;
+  }
+
+  .nav-toggle {
+    display: block;
+    padding: 0.35rem 0.2rem;
+  }
+
+  .desktop-back-btn {
+    display: none !important;
+  }
+
+  .mobile-only-back-home {
+    display: block !important;
   }
   
   .nav-menu {
     position: fixed;
-    top: 70px;
+    top: 54px;
     left: -100%;
     width: 100%;
-    height: calc(100vh - 70px);
+    height: calc(100vh - 54px);
     background: rgba(255, 255, 255, 0.96);
     backdrop-filter: blur(20px);
     -webkit-backdrop-filter: blur(20px);

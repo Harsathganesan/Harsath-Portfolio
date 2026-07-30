@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
-import { Menu, X, LayoutDashboard, ArrowLeft, LogOut } from 'lucide-react';
+import { Menu, X, ArrowLeft, LogOut } from 'lucide-react';
 
 const Navbar = ({ isAdmin, theme, onToggleTheme, onSignOut }) => {
   const [mobileOpen, setMobileOpen] = useState(false);
@@ -74,15 +74,17 @@ const Navbar = ({ isAdmin, theme, onToggleTheme, onSignOut }) => {
   return (
     <header className="navbar-header" style={{ position: 'fixed', top: 0, width: '100%', zIndex: 100 }}>
       <div className="navbar-container">
-        {/* Left: Brand name 'HarsathG' without SVG logo */}
+        {/* Left: Brand name 'HarsathG' or Avatar icon on mobile */}
         <div 
           className="logo-text" 
           onClick={() => handleNavClick('home')} 
           style={{ 
             cursor: 'pointer',
           }}
+          title="Home"
         >
-          <span style={{ fontSize: '1.6rem', fontWeight: '800', letterSpacing: '-0.03em' }}>HarsathG</span>
+          <span className="logo-circle-avatar">H</span>
+          <span className="logo-full-text">HarsathG</span>
         </div>
 
         {isAdmin ? (
@@ -118,20 +120,7 @@ const Navbar = ({ isAdmin, theme, onToggleTheme, onSignOut }) => {
             </nav>
 
             <div className="navbar-actions-right">
-              <button 
-                className="btn btn-secondary"
-                onClick={() => navigate('/admin')} 
-                style={{ 
-                  padding: '0.45rem 0.9rem', 
-                  fontSize: '0.85rem', 
-                  gap: '0.45rem',
-                  borderRadius: '10px'
-                }}
-                title="Admin Console"
-              >
-                <LayoutDashboard size={15} /> <span className="nav-btn-text">Admin</span>
-              </button>
-              <button className="nav-toggle" onClick={() => setMobileOpen(!mobileOpen)}>
+              <button className="nav-toggle" onClick={() => setMobileOpen(!mobileOpen)} aria-label="Toggle navigation menu">
                 {mobileOpen ? <X size={24} /> : <Menu size={24} />}
               </button>
             </div>

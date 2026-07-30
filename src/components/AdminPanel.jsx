@@ -3,9 +3,9 @@ import { useNavigate } from 'react-router-dom';
 import { 
   User, GraduationCap, Briefcase, Code, FolderGit, Lock, Save, Plus, Trash2, 
   Edit3, RotateCcw, AlertCircle, PlusCircle, CheckCircle, ExternalLink, Upload, Trophy,
-  Activity, Wifi, RefreshCw, Database, LayoutDashboard, BarChart3, TrendingUp, Zap
+  Activity, Wifi, RefreshCw, Database, LayoutDashboard, BarChart3, TrendingUp, Zap, Inbox, Mail, MessageSquare
 } from 'lucide-react';
-import { savePortfolioData, savePortfolioToDB, resetPortfolioData, checkBackendConnection } from '../data/db';
+import { savePortfolioData, savePortfolioToDB, resetPortfolioData, checkBackendConnection, fetchContactMessages, deleteContactMessage } from '../data/db';
 
 const AdminPanel = ({ data, onUpdate }) => {
   const navigate = useNavigate();
@@ -42,6 +42,25 @@ const AdminPanel = ({ data, onUpdate }) => {
   const [awardEditItem, setAwardEditItem] = useState(null);
   const [awardForm, setAwardForm] = useState({ title: '', issuer: '', date: '', description: '' });
 
+  // Messages state
+  const [messages, setMessages] = useState([]);
+  const [isLoadingMessages, setIsLoadingMessages] = useState(false);
+
+  const loadMessages = async () => {
+    setIsLoadingMessages(true);
+    const msgs = await fetchContactMessages();
+    setMessages(msgs || []);
+    setIsLoadingMessages(false);
+  };
+
+  const handleDeleteMsg = async (msgId) => {
+    if (window.confirm('Delete this message?')) {
+      await deleteContactMessage(msgId);
+      setMessages(prev => prev.filter(m => m._id !== msgId && m.id !== msgId));
+      triggerSuccessAlert('Message deleted.');
+    }
+  };
+
   const handleCheckConnection = async () => {
     setIsCheckingDb(true);
     const health = await checkBackendConnection();
@@ -50,10 +69,11 @@ const AdminPanel = ({ data, onUpdate }) => {
     setShowHealthModal(true);
   };
 
-  // Run silent initial health check when console is unlocked
+  // Run silent initial health check & fetch messages when console is unlocked
   useEffect(() => {
     if (isAuthenticated) {
       checkBackendConnection().then(res => setDbHealth(res));
+      loadMessages();
     }
   }, [isAuthenticated]);
 
@@ -117,10 +137,10 @@ const AdminPanel = ({ data, onUpdate }) => {
     }
   };
 
-  const handleSaveProfile = (e) => {
+  const handleSaveProfile = async (e) => {
     e.preventDefault();
     const updated = { ...data, profile: profileForm };
-    savePortfolioData(updated);
+    await savePortfolioData(updated);
     onUpdate(updated);
     triggerSuccessAlert('Profile details updated successfully!');
   };
@@ -220,7 +240,7 @@ const AdminPanel = ({ data, onUpdate }) => {
   };
 
   // Skills management
-  const handleAddSkillTag = (category) => {
+  const handleAddSkillTag = async (category) => {
     const text = (newSkillText[category] || '').trim();
     if (!text) return;
 
@@ -238,12 +258,12 @@ const AdminPanel = ({ data, onUpdate }) => {
     setNewSkillText(prev => ({ ...prev, [category]: '' }));
 
     const updated = { ...data, skills: updatedSkills };
-    savePortfolioData(updated);
+    await savePortfolioData(updated);
     onUpdate(updated);
     triggerSuccessAlert(`Added "${text}" tag!`);
   };
 
-  const handleRemoveSkillTag = (category, tagIndex) => {
+  const handleRemoveSkillTag = async (category, tagIndex) => {
     const categoryList = skillsForm[category] || [];
     const updatedSkills = {
       ...skillsForm,
@@ -252,7 +272,7 @@ const AdminPanel = ({ data, onUpdate }) => {
     setSkillsForm(updatedSkills);
 
     const updated = { ...data, skills: updatedSkills };
-    savePortfolioData(updated);
+    await savePortfolioData(updated);
     onUpdate(updated);
     triggerSuccessAlert('Skill tag removed.');
   };
@@ -272,7 +292,7 @@ const AdminPanel = ({ data, onUpdate }) => {
     setShowProjModal(true);
   };
 
-  const handleSaveProj = (e) => {
+  const handleSaveProj = async (e) => {
     e.preventDefault();
     let updatedProj = [...data.projects];
     const parsedTags = projForm.tagsInput.split(',').map(tag => tag.trim()).filter(tag => tag !== '');
@@ -297,20 +317,20 @@ const AdminPanel = ({ data, onUpdate }) => {
       ...data,
       projects: updatedProj
     };
-    savePortfolioData(updated);
+    await savePortfolioData(updated);
     onUpdate(updated);
     setShowProjModal(false);
     triggerSuccessAlert(projEditItem ? 'Project details updated!' : 'New project added successfully!');
   };
 
-  const handleDeleteProj = (id) => {
+  const handleDeleteProj = async (id) => {
     if (window.confirm('Are you sure you want to delete this project?')) {
       const updatedProj = data.projects.filter(item => item.id !== id);
       const updated = {
         ...data,
         projects: updatedProj
       };
-      savePortfolioData(updated);
+      await savePortfolioData(updated);
       onUpdate(updated);
       triggerSuccessAlert('Project removed successfully.');
     }
@@ -328,7 +348,7 @@ const AdminPanel = ({ data, onUpdate }) => {
     setShowAwardModal(true);
   };
 
-  const handleSaveAward = (e) => {
+  const handleSaveAward = async (e) => {
     e.preventDefault();
     let updatedAward = data.awards ? [...data.awards] : [];
     if (awardEditItem) {
@@ -342,29 +362,29 @@ const AdminPanel = ({ data, onUpdate }) => {
       ...data,
       awards: updatedAward
     };
-    savePortfolioData(updated);
+    await savePortfolioData(updated);
     onUpdate(updated);
     setShowAwardModal(false);
     triggerSuccessAlert(awardEditItem ? 'Award entry updated!' : 'Award entry added successfully!');
   };
 
-  const handleDeleteAward = (id) => {
+  const handleDeleteAward = async (id) => {
     if (window.confirm('Are you sure you want to delete this award record?')) {
       const updatedAward = data.awards.filter(item => item.id !== id);
       const updated = {
         ...data,
         awards: updatedAward
       };
-      savePortfolioData(updated);
+      await savePortfolioData(updated);
       onUpdate(updated);
       triggerSuccessAlert('Award entry deleted.');
     }
   };
 
   // Database Reset
-  const handleResetDb = () => {
+  const handleResetDb = async () => {
     if (window.confirm('CAUTION: This will erase all custom edits and reset the portfolio database back to default seed entries. Do you wish to proceed?')) {
-      const seeded = resetPortfolioData();
+      const seeded = await resetPortfolioData();
       setProfileForm({ ...seeded.profile });
       setSkillsForm({ ...seeded.skills });
       onUpdate(seeded);
@@ -456,6 +476,9 @@ const AdminPanel = ({ data, onUpdate }) => {
           <button className={`admin-sidebar-btn ${activeTab === 'awards' ? 'active' : ''}`} onClick={() => setActiveTab('awards')}>
             <Trophy size={18} /> Awards
           </button>
+          <button className={`admin-sidebar-btn ${activeTab === 'messages' ? 'active' : ''}`} onClick={() => { setActiveTab('messages'); loadMessages(); }}>
+            <Inbox size={18} /> Messages Inbox {messages.length > 0 && <span style={{ background: 'var(--accent-primary)', color: 'white', fontSize: '0.7rem', padding: '0.1rem 0.45rem', borderRadius: '10px', marginLeft: 'auto' }}>{messages.length}</span>}
+          </button>
         </div>
 
         {/* Sidebar Footer Controls */}
@@ -494,6 +517,7 @@ const AdminPanel = ({ data, onUpdate }) => {
               {activeTab === 'skills' && 'Skills Directory'}
               {activeTab === 'projects' && 'Projects Portfolio'}
               {activeTab === 'awards' && 'Honors & Achievements'}
+              {activeTab === 'messages' && 'Contact Form Messages Inbox'}
             </h2>
 
             {dbHealth && (
@@ -598,7 +622,23 @@ const AdminPanel = ({ data, onUpdate }) => {
                   <span style={{ fontSize: '0.78rem', color: '#10b981', fontWeight: 500 }}>Click to view timeline →</span>
                 </div>
 
-                {/* Stat 4: Database Status */}
+                {/* Stat 4: Contact Messages */}
+                <div 
+                  className="glass-card" 
+                  onClick={() => { setActiveTab('messages'); loadMessages(); }}
+                  style={{ padding: '1.25rem', borderRadius: '14px', cursor: 'pointer', border: '1px solid var(--border-glass)', transition: 'all 0.2s ease' }}
+                >
+                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                    <span style={{ fontSize: '0.85rem', color: 'var(--text-secondary)', fontWeight: 500 }}>Messages Inbox</span>
+                    <div style={{ width: '36px', height: '36px', borderRadius: '8px', background: 'rgba(245, 158, 11, 0.1)', color: '#f59e0b', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                      <Inbox size={20} />
+                    </div>
+                  </div>
+                  <h3 style={{ fontSize: '1.8rem', margin: '0.75rem 0 0.25rem 0', color: 'var(--text-primary)' }}>{messages.length}</h3>
+                  <span style={{ fontSize: '0.78rem', color: '#f59e0b', fontWeight: 500 }}>Click to read messages →</span>
+                </div>
+
+                {/* Stat 5: Database Status */}
                 <div 
                   className="glass-card" 
                   onClick={handleCheckConnection}
@@ -903,6 +943,61 @@ const AdminPanel = ({ data, onUpdate }) => {
                 ))}
                 {(!data.awards || data.awards.length === 0) && (
                   <p style={{ color: 'var(--text-secondary)', textAlign: 'center', padding: '2rem' }}>No awards added yet.</p>
+                )}
+              </div>
+            </div>
+          )}
+
+          {/* MESSAGES TAB */}
+          {activeTab === 'messages' && (
+            <div>
+              <div className="admin-section-header">
+                <div>
+                  <h3>Contact Messages Inbox</h3>
+                  <p style={{ color: 'var(--text-secondary)', fontSize: '0.88rem', margin: '0.25rem 0 0 0' }}>
+                    Messages submitted by visitors through your portfolio contact form (Stored in MongoDB Atlas).
+                  </p>
+                </div>
+                <button className="btn btn-secondary" onClick={loadMessages} disabled={isLoadingMessages}>
+                  <RefreshCw size={15} className={isLoadingMessages ? 'spin-animation' : ''} /> Refresh Messages
+                </button>
+              </div>
+
+              <div className="admin-item-list" style={{ marginTop: '1.25rem' }}>
+                {messages && messages.length > 0 ? (
+                  messages.map(msg => (
+                    <div key={msg._id || msg.id} className="admin-item-row" style={{ flexDirection: 'column', alignItems: 'flex-start', gap: '0.75rem', padding: '1.25rem', background: 'var(--bg-glass)', borderRadius: '12px', border: '1px solid var(--border-glass)' }}>
+                      <div style={{ display: 'flex', justifyContent: 'space-between', width: '100%', alignItems: 'center' }}>
+                        <div style={{ display: 'flex', alignItems: 'center', gap: '0.6rem' }}>
+                          <span style={{ fontWeight: 700, fontSize: '1rem', color: 'var(--text-primary)' }}>{msg.name}</span>
+                          <span style={{ fontSize: '0.82rem', color: 'var(--accent-primary)', background: 'rgba(2, 132, 199, 0.1)', padding: '0.15rem 0.6rem', borderRadius: '12px' }}>{msg.email}</span>
+                        </div>
+                        <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
+                          <span style={{ fontSize: '0.78rem', color: 'var(--text-muted)' }}>
+                            {msg.createdAt ? new Date(msg.createdAt).toLocaleString() : ''}
+                          </span>
+                          <button className="btn-icon-danger" onClick={() => handleDeleteMsg(msg._id || msg.id)} title="Delete Message">
+                            <Trash2 size={16} />
+                          </button>
+                        </div>
+                      </div>
+
+                      <div style={{ width: '100%' }}>
+                        <div style={{ fontWeight: 600, fontSize: '0.92rem', color: 'var(--text-secondary)', marginBottom: '0.35rem' }}>
+                          Subject: {msg.subject}
+                        </div>
+                        <div style={{ fontSize: '0.9rem', color: 'var(--text-primary)', background: 'rgba(0, 0, 0, 0.03)', padding: '0.85rem 1rem', borderRadius: '8px', borderLeft: '3px solid var(--accent-primary)', whiteSpace: 'pre-wrap' }}>
+                          {msg.message}
+                        </div>
+                      </div>
+                    </div>
+                  ))
+                ) : (
+                  <div style={{ textAlign: 'center', padding: '3rem 1rem', color: 'var(--text-secondary)', background: 'var(--bg-glass)', borderRadius: '12px', border: '1px dashed var(--border-glass)' }}>
+                    <Inbox size={40} style={{ margin: '0 auto 0.75rem auto', opacity: 0.5, display: 'block' }} />
+                    <h4 style={{ margin: 0, color: 'var(--text-primary)' }}>No Messages Received Yet</h4>
+                    <p style={{ fontSize: '0.85rem', marginTop: '0.25rem' }}>Messages sent via the Contact section will appear here in real-time.</p>
+                  </div>
                 )}
               </div>
             </div>

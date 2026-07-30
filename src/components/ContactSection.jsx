@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
-import { Mail, MapPin, Send, CheckCircle2, Phone } from 'lucide-react';
+import { Mail, MapPin, Send, CheckCircle2, Phone, Loader2 } from 'lucide-react';
+import { sendContactMessage } from '../data/db';
 
 const ContactSection = ({ profile }) => {
   const [formData, setFormData] = useState({
@@ -9,6 +10,7 @@ const ContactSection = ({ profile }) => {
     message: ''
   });
   const [errors, setErrors] = useState({});
+  const [isSubmitting, setIsSubmitting] = useState(false);
   const [submitted, setSubmitted] = useState(false);
 
   const handleChange = (e) => {
@@ -34,9 +36,14 @@ const ContactSection = ({ profile }) => {
     return Object.keys(newErrors).length === 0;
   };
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
     if (validateForm()) {
+      setIsSubmitting(true);
+      
+      // Save contact message to MongoDB Atlas Backend API
+      await sendContactMessage(formData);
+
       // Build WhatsApp pre-filled message URL
       const whatsappNumber = "916382245266";
       const messageText = `Hi Harsath,\n\n*Name:* ${formData.name}\n*Email:* ${formData.email}\n*Subject:* ${formData.subject}\n*Message:* ${formData.message}`;
@@ -45,6 +52,7 @@ const ContactSection = ({ profile }) => {
       // Open WhatsApp in a new tab
       window.open(whatsappUrl, '_blank');
 
+      setIsSubmitting(false);
       setSubmitted(true);
       setFormData({ name: '', email: '', subject: '', message: '' });
       setTimeout(() => setSubmitted(false), 5000);
@@ -177,8 +185,17 @@ const ContactSection = ({ profile }) => {
                 {errors.message && <span style={{ color: '#ef4444', fontSize: '0.75rem', marginTop: '0.2rem' }}>{errors.message}</span>}
               </div>
 
-              <button type="submit" className="btn btn-primary" style={{ alignSelf: 'flex-start', marginTop: '0.5rem' }}>
-                Send Message <Send size={16} />
+              <button 
+                type="submit" 
+                className="btn btn-primary" 
+                disabled={isSubmitting}
+                style={{ alignSelf: 'flex-start', marginTop: '0.5rem', opacity: isSubmitting ? 0.7 : 1 }}
+              >
+                {isSubmitting ? (
+                  <>Sending Message... <Loader2 size={16} className="animate-spin" /></>
+                ) : (
+                  <>Send Message <Send size={16} /></>
+                )}
               </button>
             </form>
           )}

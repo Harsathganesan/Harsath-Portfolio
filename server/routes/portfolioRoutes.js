@@ -3,9 +3,11 @@ import mongoose from 'mongoose';
 import fs from 'fs';
 import path from 'path';
 import Portfolio from '../models/Portfolio.js';
+import Contact from '../models/Contact.js';
 
 const router = express.Router();
 const localDataPath = path.resolve('server/local_db.json');
+const messagesBackupPath = path.resolve('server/messages_backup.json');
 
 // GET /api/portfolio/health - Backend & MongoDB Atlas Connection Health Check
 router.get('/health', async (req, res) => {
@@ -225,6 +227,94 @@ router.put('/', async (req, res) => {
   }
 
   res.json(updatedData);
+});
+
+// POST submit contact message to MongoDB Atlas & backup file
+router.post('/contact', async (req, res) => {
+  const { name, email, subject, message } = req.body;
+
+  if (!name || !email || !subject || !message) {
+    return res.status(400).json({ error: 'All fields (name, email, subject, message) are required.' });
+  }
+
+  const messageDoc = {
+    id: `msg-${Date.now()}`,
+    name,
+    email,
+    subject,
+    message,
+    status: 'unread',
+    createdAt: new Date().toISOString()
+  };
+
+  // Save to MongoDB Atlas if connected
+  try {
+    if (mongoose.connection.readyState === 1) {
+      const newContact = new Contact({ name, email, subject, message });
+      const savedContact = await newContact.save();
+      console.log('Saved contact message to MongoDB Atlas:', savedContact._id);
+    }
+  } catch (error) {
+    console.warn('MongoDB Atlas contact save error, storing in local file backup:', error.message);
+  }
+
+  // Save to local backup file
+  try {
+    let currentMsgs = [];
+    if (fs.existsSync(messagesBackupPath)) {
+      currentMsgs = JSON.parse(fs.readFileSync(messagesBackupPath, 'utf8'));
+    }
+    currentMsgs.unshift(messageDoc);
+    fs.writeFileSync(messagesBackupPath, JSON.stringify(currentMsgs, null, 2));
+  } catch (e) {
+    console.warn('Local messages backup write skipped:', e.message);
+  }
+
+  res.status(201).json({ success: true, message: 'Contact message received successfully!', data: messageDoc });
+});
+
+// GET fetch all contact messages for Admin Console
+router.get('/messages', async (req, res) => {
+  try {
+    if (mongoose.connection.readyState === 1) {
+      const dbMessages = await Contact.find().sort({ createdAt: -1 });
+      return res.status(200).json(dbMessages);
+    }
+  } catch (error) {
+    console.warn('MongoDB fetch messages error, falling back to local file backup:', error.message);
+  }
+
+  if (fs.existsSync(messagesBackupPath)) {
+    try {
+      const fileData = JSON.parse(fs.readFileSync(messagesBackupPath, 'utf8'));
+      return res.status(200).json(fileData);
+    } catch (e) {}
+  }
+
+  res.status(200).json([]);
+});
+
+// DELETE a contact message by ID
+router.delete('/messages/:id', async (req, res) => {
+  const { id } = req.params;
+
+  try {
+    if (mongoose.connection.readyState === 1 && mongoose.Types.ObjectId.isValid(id)) {
+      await Contact.findByIdAndDelete(id);
+    }
+  } catch (error) {
+    console.warn('MongoDB delete message error:', error.message);
+  }
+
+  if (fs.existsSync(messagesBackupPath)) {
+    try {
+      let fileData = JSON.parse(fs.readFileSync(messagesBackupPath, 'utf8'));
+      fileData = fileData.filter(m => m._id !== id && m.id !== id);
+      fs.writeFileSync(messagesBackupPath, JSON.stringify(fileData, null, 2));
+    } catch (e) {}
+  }
+
+  res.status(200).json({ success: true, message: 'Message deleted successfully.' });
 });
 
 // POST seed initial portfolio data into MongoDB

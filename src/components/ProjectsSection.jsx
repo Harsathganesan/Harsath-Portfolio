@@ -1,29 +1,40 @@
 import React, { useState } from 'react';
-import { Github, ExternalLink, ChevronRight, ArrowLeft, Layers } from 'lucide-react';
+import { Github, ExternalLink, ChevronRight, X, Layers } from 'lucide-react';
 
 const ProjectsSection = ({ projects = [] }) => {
   const [selectedProject, setSelectedProject] = useState(null);
   const [showAll, setShowAll] = useState(false);
   const displayedProjects = showAll ? projects : projects.slice(0, 3);
 
+  const handleSelectProject = (project) => {
+    setSelectedProject(project);
+    setTimeout(() => {
+      const el = document.getElementById('projects');
+      if (el) {
+        const topPos = el.getBoundingClientRect().top + window.pageYOffset - 80;
+        window.scrollTo({ top: topPos, behavior: 'smooth' });
+      }
+    }, 50);
+  };
+
   return (
     <section id="projects" className="section container" style={{ paddingTop: '3rem' }}>
-      {/* Centered My Projects Title (like other sections) */}
+      {/* Centered My Projects Title */}
       <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', marginBottom: '2.5rem', position: 'relative', width: '100%' }}>
         <h2 className="section-title" style={{ margin: 0 }}>My Projects</h2>
         {selectedProject && (
           <button 
-            className="btn btn-secondary"
+            className="btn btn-secondary desktop-back-btn"
             onClick={() => setSelectedProject(null)}
-            style={{ position: 'absolute', right: 0, padding: '0.6rem 1.2rem', borderRadius: '8px' }}
+            style={{ position: 'absolute', right: 0, padding: '0.5rem 1rem', borderRadius: '8px', fontSize: '0.88rem' }}
           >
-            <ArrowLeft size={16} /> Back to All Projects
+            <X size={16} /> Cancel
           </button>
         )}
       </div>
 
       {selectedProject ? (
-        /* Focused Single Project View (Heading Top, Photo Left, Content Right, Links Bottom) */
+        /* Focused Single Project View */
         <div className="project-detail-layout glass-card">
           {/* Top: Heading of Project */}
           <div className="project-detail-header">
@@ -81,6 +92,17 @@ const ProjectsSection = ({ projects = [] }) => {
               </a>
             )}
           </div>
+
+          {/* Cancel Button at bottom */}
+          <div style={{ marginTop: '1.8rem', paddingTop: '1rem', borderTop: '1px solid var(--border-glass)', textAlign: 'center' }}>
+            <button 
+              className="btn btn-secondary"
+              onClick={() => setSelectedProject(null)}
+              style={{ width: '100%', justifyContent: 'center', padding: '0.75rem 1.5rem', borderRadius: '12px', fontSize: '0.9rem', gap: '0.4rem' }}
+            >
+              <X size={18} /> Cancel
+            </button>
+          </div>
         </div>
       ) : (
         /* 3-Column Projects Grid View */
@@ -91,7 +113,7 @@ const ProjectsSection = ({ projects = [] }) => {
                 <div 
                   key={project.id} 
                   className="project-screenshot-card"
-                  onClick={() => setSelectedProject(project)}
+                  onClick={() => handleSelectProject(project)}
                   style={{ cursor: 'pointer' }}
                   title="Click to open this project in detail view"
                 >
@@ -119,7 +141,7 @@ const ProjectsSection = ({ projects = [] }) => {
                     <div className="project-card-footer-links" onClick={(e) => e.stopPropagation()}>
                       <button 
                         className="project-read-more-link primary-link"
-                        onClick={() => setSelectedProject(project)}
+                        onClick={() => handleSelectProject(project)}
                         style={{ background: 'none', border: 'none', padding: 0, cursor: 'pointer' }}
                       >
                         View Project <ChevronRight size={14} />
@@ -130,7 +152,7 @@ const ProjectsSection = ({ projects = [] }) => {
               ))
             ) : (
               <p style={{ color: 'var(--text-secondary)', textAlign: 'center', padding: '4rem', gridColumn: 'span 3' }}>
-                No projects added yet. Click Admin to add your first project!
+                No projects added yet.
               </p>
             )}
           </div>
