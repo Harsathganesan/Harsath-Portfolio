@@ -30,7 +30,41 @@ const AdminPanel = ({ data, onUpdate }) => {
   const [showHealthModal, setShowHealthModal] = useState(false);
 
   // Active form state for editing
-  const [profileForm, setProfileForm] = useState({ ...data.profile });
+  const [profileForm, setProfileForm] = useState({
+    name: data?.profile?.name || '',
+    role: data?.profile?.role || '',
+    tagline: data?.profile?.tagline || '',
+    photo: data?.profile?.photo || '/harsath_photo.png',
+    resumeUrl: data?.profile?.resumeUrl || '/G.Harsath Resume.pdf',
+    socials: {
+      github: data?.profile?.socials?.github || '',
+      linkedin: data?.profile?.socials?.linkedin || '',
+      email: data?.profile?.socials?.email || '',
+      phone: data?.profile?.socials?.phone || '',
+      location: data?.profile?.socials?.location || ''
+    }
+  });
+
+  // Sync state when data finishes loading asynchronously
+  useEffect(() => {
+    if (data && data.profile) {
+      setProfileForm({
+        name: data.profile.name || '',
+        role: data.profile.role || '',
+        tagline: data.profile.tagline || '',
+        photo: data.profile.photo || '/harsath_photo.png',
+        resumeUrl: data.profile.resumeUrl || '/G.Harsath Resume.pdf',
+        socials: {
+          github: data.profile.socials?.github || '',
+          linkedin: data.profile.socials?.linkedin || '',
+          email: data.profile.socials?.email || '',
+          phone: data.profile.socials?.phone || '',
+          location: data.profile.socials?.location || ''
+        }
+      });
+      if (data.skills) setSkillsForm(data.skills);
+    }
+  }, [data]);
   const [skillsForm, setSkillsForm] = useState(data.skills || { frontend: [], backend: [], database: [], tools: [] });
   const [newSkillText, setNewSkillText] = useState({ frontend: '', backend: '', database: '', tools: '' });
   
@@ -136,7 +170,10 @@ const AdminPanel = ({ data, onUpdate }) => {
       const socialKey = name.split('.')[1];
       setProfileForm(prev => ({
         ...prev,
-        socials: { ...prev.socials, [socialKey]: value }
+        socials: {
+          ...(prev?.socials || {}),
+          [socialKey]: value
+        }
       }));
     } else {
       setProfileForm(prev => ({ ...prev, [name]: value }));
@@ -153,6 +190,21 @@ const AdminPanel = ({ data, onUpdate }) => {
       const reader = new FileReader();
       reader.onloadend = () => {
         setProfileForm(prev => ({ ...prev, photo: reader.result }));
+      };
+      reader.readAsDataURL(file);
+    }
+  };
+
+  const handleResumeFileUpload = (e) => {
+    const file = e.target.files[0];
+    if (file) {
+      if (file.size > 2 * 1024 * 1024) {
+        alert("PDF is too large! Please choose a file smaller than 2MB.");
+        return;
+      }
+      const reader = new FileReader();
+      reader.onloadend = () => {
+        setProfileForm(prev => ({ ...prev, resumeUrl: reader.result }));
       };
       reader.readAsDataURL(file);
     }
@@ -175,7 +227,29 @@ const AdminPanel = ({ data, onUpdate }) => {
 
   const handleSaveProfile = async (e) => {
     e.preventDefault();
-    const updated = { ...data, profile: profileForm };
+
+    const formatSocialUrl = (url) => {
+      if (!url || !url.trim()) return '';
+      const trimmed = url.trim();
+      if (!trimmed.startsWith('http://') && !trimmed.startsWith('https://') && !trimmed.startsWith('mailto:')) {
+        return `https://${trimmed}`;
+      }
+      return trimmed;
+    };
+
+    const cleanedProfile = {
+      ...profileForm,
+      socials: {
+        ...(profileForm.socials || {}),
+        github: formatSocialUrl(profileForm.socials?.github),
+        linkedin: formatSocialUrl(profileForm.socials?.linkedin),
+        email: profileForm.socials?.email?.trim() || '',
+        phone: profileForm.socials?.phone?.trim() || '',
+        location: profileForm.socials?.location?.trim() || ''
+      }
+    };
+
+    const updated = { ...data, profile: cleanedProfile };
     await savePortfolioData(updated);
     onUpdate(updated);
     triggerSuccessAlert('Profile details updated successfully!');
@@ -768,51 +842,87 @@ const AdminPanel = ({ data, onUpdate }) => {
                 <input type="text" name="tagline" value={profileForm.tagline} onChange={handleProfileChange} className="form-input" required />
               </div>
 
-              <div className="form-group">
-                <label className="form-label">Avatar / Photo URL</label>
-                <div style={{ display: 'flex', gap: '0.75rem', alignItems: 'center' }}>
-                  <input 
-                    type="text" 
-                    name="photo" 
-                    value={profileForm.photo} 
-                    onChange={handleProfileChange} 
-                    className="form-input" 
-                    style={{ flexGrow: 1 }}
-                    placeholder="Enter image URL or select from PC"
-                  />
-                  <input 
-                    type="file" 
-                    accept="image/*" 
-                    id="profile-photo-file" 
-                    onChange={handleProfilePhotoUpload} 
-                    style={{ display: 'none' }}
-                  />
-                  <label htmlFor="profile-photo-file" className="btn btn-secondary" style={{ cursor: 'pointer', whiteSpace: 'nowrap', padding: '0.7rem 1.2rem', borderRadius: '8px' }}>
-                    <Upload size={16} /> Choose File
-                  </label>
+              <div className="admin-fields-row">
+                <div className="form-group">
+                  <label className="form-label">Avatar / Photo URL</label>
+                  <div style={{ display: 'flex', gap: '0.75rem', alignItems: 'center' }}>
+                    <input 
+                      type="text" 
+                      name="photo" 
+                      value={profileForm.photo} 
+                      onChange={handleProfileChange} 
+                      className="form-input" 
+                      style={{ flexGrow: 1 }}
+                      placeholder="Enter image URL or select from PC"
+                    />
+                    <input 
+                      type="file" 
+                      accept="image/*" 
+                      id="profile-photo-file" 
+                      onChange={handleProfilePhotoUpload} 
+                      style={{ display: 'none' }}
+                    />
+                    <label htmlFor="profile-photo-file" className="btn btn-secondary" style={{ cursor: 'pointer', whiteSpace: 'nowrap', padding: '0.7rem 1.2rem', borderRadius: '8px' }}>
+                      <Upload size={16} /> Choose File
+                    </label>
+                  </div>
+                </div>
+
+                <div className="form-group">
+                  <label className="form-label">Resume PDF Link</label>
+                  <div style={{ display: 'flex', gap: '0.75rem', alignItems: 'center' }}>
+                    <input 
+                      type="text" 
+                      name="resumeUrl" 
+                      value={profileForm.resumeUrl || ''} 
+                      onChange={handleProfileChange} 
+                      className="form-input" 
+                      style={{ flexGrow: 1 }}
+                      placeholder="Enter PDF URL or select from PC"
+                    />
+                    <input 
+                      type="file" 
+                      accept=".pdf,application/pdf" 
+                      id="profile-resume-file" 
+                      onChange={handleResumeFileUpload} 
+                      style={{ display: 'none' }}
+                    />
+                    <label htmlFor="profile-resume-file" className="btn btn-secondary" style={{ cursor: 'pointer', whiteSpace: 'nowrap', padding: '0.7rem 1.2rem', borderRadius: '8px' }}>
+                      <Upload size={16} /> Choose PDF
+                    </label>
+                  </div>
                 </div>
               </div>
 
               <div className="admin-section-header" style={{ marginTop: '1.5rem', marginBottom: '1rem', borderBottom: '1px solid var(--border-glass)' }}>
-                <h4 style={{ color: 'var(--text-secondary)' }}>Social Handles</h4>
+                <h4 style={{ color: 'var(--text-secondary)' }}>Contact & Social Handles</h4>
               </div>
 
               <div className="admin-fields-row">
                 <div className="form-group">
                   <label className="form-label">GitHub Link</label>
-                  <input type="url" name="socials.github" value={profileForm.socials.github} onChange={handleProfileChange} className="form-input" />
+                  <input type="text" name="socials.github" value={profileForm.socials?.github || ''} onChange={handleProfileChange} className="form-input" placeholder="e.g. github.com/username or https://github.com/username" />
                 </div>
                 <div className="form-group">
                   <label className="form-label">LinkedIn Link</label>
-                  <input type="url" name="socials.linkedin" value={profileForm.socials.linkedin} onChange={handleProfileChange} className="form-input" />
+                  <input type="text" name="socials.linkedin" value={profileForm.socials?.linkedin || ''} onChange={handleProfileChange} className="form-input" placeholder="e.g. linkedin.com/in/username or https://linkedin.com/in/username" />
                 </div>
               </div>
 
               <div className="admin-fields-row">
                 <div className="form-group">
                   <label className="form-label">Primary Contact Email</label>
-                  <input type="email" name="socials.email" value={profileForm.socials.email} onChange={handleProfileChange} className="form-input" />
+                  <input type="email" name="socials.email" value={profileForm.socials?.email || ''} onChange={handleProfileChange} className="form-input" placeholder="e.g. harsath137@gmail.com" />
                 </div>
+                <div className="form-group">
+                  <label className="form-label">Phone / WhatsApp Number</label>
+                  <input type="text" name="socials.phone" value={profileForm.socials?.phone || ''} onChange={handleProfileChange} className="form-input" placeholder="e.g. +91 6382245266" />
+                </div>
+              </div>
+
+              <div className="form-group">
+                <label className="form-label">Location / Address</label>
+                <input type="text" name="socials.location" value={profileForm.socials?.location || ''} onChange={handleProfileChange} className="form-input" placeholder="e.g. Pudukkottai, Tamil Nadu, India" />
               </div>
             </form>
           )}

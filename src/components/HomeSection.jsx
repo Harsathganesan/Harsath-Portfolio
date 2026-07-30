@@ -103,7 +103,7 @@ const HomeSection = ({ profile }) => {
           <div className="hero-image-container">
             <div className="profile-hero-avatar floating-effect">
               <img 
-                src="/harsath_photo.png" 
+                src={profile.photo || "/harsath_photo.png"} 
                 alt={profile.name} 
                 className="profile-hero-img" 
               />
